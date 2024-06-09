@@ -9,7 +9,14 @@ export default function useRegister() {
     mutationFn: async (variables) => {
       const payload = variables;
 
-      const response = await API_URL.post(`/api/register`, payload);
+      const inputData = {
+        ...payload,
+        username: payload.email,
+      };
+
+      console.log(process.env.API_URL, 'API_URL');
+
+      const response = await API_URL.post(`/api/register/`, inputData);
       return response.data?.data;
     },
     onSuccess: () => {

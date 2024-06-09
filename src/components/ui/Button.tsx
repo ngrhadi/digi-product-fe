@@ -1,7 +1,7 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
-import { Button, UnstyledButton } from '@mantine/core';
+import { signOut, useSession } from 'next-auth/react';
+import { Button, Menu, UnstyledButton } from '@mantine/core';
 import Link from 'next/link';
 
 export const ButtonHome = () => {
@@ -12,41 +12,77 @@ export const ButtonHome = () => {
   );
 };
 
-export const LoginButton = () => {
+export const LoginButton = ({ fullWidth }: { fullWidth?: boolean }) => {
   return (
-    <Button variant="default" className="p-2 w-fit min-w-40 text-center">
+    <Button
+      variant="default"
+      style={{
+        width: fullWidth ? '100%' : 'auto',
+      }}
+      fullWidth={fullWidth}
+      className="p-2 text-center"
+    >
       <Link href="/login">Sign in</Link>
     </Button>
   );
 };
 
-export const RegisterButton = () => {
+export const RegisterButton = ({ fullWidth }: { fullWidth?: boolean }) => {
   return (
     <Button
       variant="default"
-      className="border border-white p-2 w-fit min-w-40 text-center hover:bg-white hover:text-zinc-900"
+      style={{
+        width: fullWidth ? '100%' : 'auto',
+      }}
+      fullWidth={fullWidth}
+      className="border border-white p-2 text-center hover:bg-white hover:text-zinc-900"
     >
       <Link href="/register">Register</Link>
     </Button>
   );
 };
 
-export const LogoutButton = () => {
+export const ProfileButton = ({
+  fullWidth,
+  name,
+}: {
+  fullWidth?: boolean;
+  name: string;
+}) => {
   return (
-    <Button
-      variant="filled"
-      className="border border-white p-2 w-fit min-w-40 text-center hover:bg-white hover:text-zinc-900"
-      onClick={() => signOut()}
-    >
-      Sign Out
-    </Button>
-  );
-};
-
-export const ProfileButton = () => {
-  return (
-    <Button variant="default" className="p-2 w-fit min-w-40 text-center">
-      <Link href="/profile">Profile</Link>
-    </Button>
+    <Menu shadow="md" width={200}>
+      <Menu.Target>
+        <Button
+          variant="default"
+          style={{
+            width: fullWidth ? '100%' : 'auto',
+          }}
+          fullWidth={fullWidth}
+          className="p-2 text-center flex gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+            />
+          </svg>
+          {name}
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Link href="/profile">Profile</Link>
+        <Button fullWidth variant="fill" onClick={() => signOut()}>
+          Logout
+        </Button>
+      </Menu.Dropdown>
+    </Menu>
   );
 };
