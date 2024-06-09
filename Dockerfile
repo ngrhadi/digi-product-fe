@@ -1,58 +1,62 @@
-# syntax = docker/dockerfile:experimental
-
+# Use the official Node.js 19-alpine image as the base image
 FROM node:19-alpine AS base
 
+# Install pnpm globally
 RUN npm install --global --no-update-notifier --no-fund pnpm
 
-# Install dependencies only when needed
+# Create the nextjs user and group
+RUN addgroup -S nextjs && adduser -S -G nextjs -h /home/nextjs nextjs
+
+# Stage to install dependencies
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+
+# Ensure apk has necessary permissions
+USER root
 RUN apk add --no-cache libc6-compat
+
+# Switch to the nextjs user
+USER nextjs
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json .npmrc pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --prefer-offline
 
-# Rebuild the source code only when needed
+# Stage to build the application
 FROM base AS builder
 
+# Switch to the nextjs user
+USER nextjs
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
-
 RUN pnpm build
 
-# Production image, copy all the files and run next
-FROM base AS runner
+# Production stage
+FROM node:19-alpine AS runner
+
+# Create the nextjs user and group
+RUN addgroup -S nextjs && adduser -S -G nextjs -h /home/nextjs nextjs
+
+# Switch to the nextjs user
+USER nextjs
 WORKDIR /app
-
-# Get the latest Git tag and pass it as a build argument
-# ARG GIT_COMMIT_SHA
-# ENV NEXT_PUBLIC_GIT_COMMIT_SHA=$GIT_COMMIT_SHA
-
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
+# Copy built files and necessary resources
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.env.local* ./
 
-USER nextjs
-
+# Expose the port the app runs on
 EXPOSE 3000
 
 ENV PORT 3000
 
-CMD ["pnpm", "start"]
-# CMD ['node' '.next/standalone/server.js']
+# Set the default command to run the application
+# CMD ["pnpm", "start"]
+CMD ["node", ".next/standalone/server.js"]
