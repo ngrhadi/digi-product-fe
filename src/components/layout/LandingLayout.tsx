@@ -20,8 +20,8 @@ type LandingProps = {
 };
 
 export default function LandingLayout({ children }: LandingProps) {
+  const { data, status } = useSession();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
-  const { data } = useSession() as UseSessionResult;
 
   const [mobileOpened, mobileHandlers] = useDisclosure(false, {
     onOpen: () => console.log('Opened'),
@@ -56,13 +56,13 @@ export default function LandingLayout({ children }: LandingProps) {
           <Group justify="space-between" style={{ flex: 1 }}>
             <ButtonHome />
             <Group ml="xl" gap={0} visibleFrom="sm">
-              <Navbar session={data} isMobile={false} />
+              <Navbar isMobile={false} status={status} />
             </Group>
           </Group>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <Navbar session={data} isMobile={true} />
+        <Navbar isMobile={true} status={status} />
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>

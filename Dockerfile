@@ -58,5 +58,5 @@ EXPOSE 3000
 ENV PORT 3000
 
 # Set the default command to run the application
-# CMD ["pnpm", "start"]
-CMD ["node", ".next/standalone/server.js"]
+CMD ["pnpm", "start"]
+# CMD ["node", ".next/standalone/server.js"]

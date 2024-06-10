@@ -3,26 +3,37 @@
 import { useMantineColorScheme, ActionIcon } from '@mantine/core';
 import { LoginButton, ProfileButton, RegisterButton } from '../ui/Button';
 import { AuthenticatedSession } from '@/types/auth';
+import { Session } from 'next-auth';
+import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { API_URL } from '@/lib/api';
+import { ResponseJWT } from '@/types/response';
 
 export default function Navbar({
-  session,
   isMobile,
+  status,
 }: {
-  session: AuthenticatedSession | null;
+  status: 'loading' | 'authenticated' | 'unauthenticated';
   isMobile: boolean;
 }) {
   const { setColorScheme, colorScheme } = useMantineColorScheme();
+  const [name, setName] = useState<string>();
+
+  useEffect(() => {
+    fetch('/api/user')
+      .then((res) => res.json())
+      .then(async (data) => {
+        setName(data.first_name);
+      });
+  }, []);
 
   return (
     <>
       {isMobile ? (
         <div className="w-full flex justify-center flex-col h-auto p-2 items-center">
-          {session?.authenticated === true ? (
+          {status === 'authenticated' ? (
             <div className="flex flex-col w-fit gap-4 items-center">
-              <ProfileButton
-                fullWidth={true}
-                name={session?.session.user.first_name}
-              />
+              <ProfileButton fullWidth={true} name={name ?? ''} />
               {colorScheme === 'dark' ? (
                 <ActionIcon
                   variant="transparent"
@@ -117,12 +128,9 @@ export default function Navbar({
         </div>
       ) : (
         <div className="w-full flex justify-between h-auto p-2 items-center">
-          {session?.authenticated === true ? (
+          {status === 'authenticated' ? (
             <div className="flex w-fit gap-4 items-center">
-              <ProfileButton
-                fullWidth={false}
-                name={session?.session.user.first_name}
-              />
+              <ProfileButton fullWidth={false} name={name ?? ''} />
               {colorScheme === 'dark' ? (
                 <ActionIcon
                   variant="transparent"

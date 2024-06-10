@@ -1,6 +1,6 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import { ReactNode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createStore, Provider } from 'jotai';
@@ -8,10 +8,11 @@ import '@mantine/core/styles.css';
 import { createTheme, MantineProvider } from '@mantine/core';
 import { Session } from 'next-auth';
 import { usePathname, useRouter } from 'next/navigation';
+import AuthWrapper from '@/components/AuthWrapper';
 
 type Props = {
   children?: ReactNode;
-  session: Session | null;
+  session?: Session | null;
 };
 
 const theme = createTheme({
@@ -54,32 +55,14 @@ const theme = createTheme({
 export const queryClient = new QueryClient();
 export const mainStore = createStore();
 
-const unauthedPaths = new Set(['/', '/login', '/register']);
 const NextAuthProvider = ({ children, session }: Props) => {
-  const pathURL = usePathname();
-  const router = useRouter();
-
-  const pathName = pathURL;
-
-  const noCheck = unauthedPaths.has(pathName);
-
-  useEffect(() => {
-    if (noCheck) {
-      return;
-    }
-
-    if (!session?.user) {
-      router.push('/login');
-    }
-
-    return () => {};
-  }, [noCheck, router, session?.user]);
-
   return (
     <MantineProvider theme={theme}>
-      <SessionProvider basePath={'/auth'} session={session}>
+      <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
-          <Provider store={mainStore}>{children}</Provider>
+          <Provider store={mainStore}>
+            <AuthWrapper>{children}</AuthWrapper>
+          </Provider>
         </QueryClientProvider>
       </SessionProvider>
     </MantineProvider>

@@ -1,8 +1,10 @@
 'use client';
 
 import { signOut, useSession } from 'next-auth/react';
-import { Button, Menu, UnstyledButton } from '@mantine/core';
+import { Button, Divider, Menu, UnstyledButton } from '@mantine/core';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export const ButtonHome = () => {
   return (
@@ -49,6 +51,8 @@ export const ProfileButton = ({
   fullWidth?: boolean;
   name: string;
 }) => {
+  const router = useRouter();
+
   return (
     <Menu shadow="md" width={200}>
       <Menu.Target>
@@ -78,8 +82,31 @@ export const ProfileButton = ({
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
-        <Link href="/profile">Profile</Link>
-        <Button fullWidth variant="fill" onClick={() => signOut()}>
+        <Button
+          fullWidth
+          variant="default"
+          onClick={() => router.push('/dashboard')}
+        >
+          Shop
+        </Button>
+        <Button
+          fullWidth
+          variant="default"
+          onClick={() => router.push('/profile')}
+        >
+          Profile
+        </Button>
+        <Divider my="sm" />
+        <Button
+          fullWidth
+          variant="fill"
+          bg="cyan"
+          onClick={() => {
+            Cookies.remove('token');
+            Cookies.remove('refresh');
+            signOut();
+          }}
+        >
           Logout
         </Button>
       </Menu.Dropdown>
