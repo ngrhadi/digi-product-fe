@@ -7,6 +7,10 @@ export type ApiResponse = {
   access_token: string;
   refresh_token: string;
   user: {
+    token: {
+      access_token: string;
+      refresh_token: string;
+    };
     id: any;
     first_name: string;
     last_name: string;
@@ -14,7 +18,6 @@ export type ApiResponse = {
     email: string;
   };
 };
-
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
@@ -52,6 +55,10 @@ export const authOptions: NextAuthOptions = {
               access_token: user.access_token,
               refresh_token: user.refresh_token,
               user: {
+                token: {
+                  access_token: user.access_token,
+                  refresh_token: user.refresh_token,
+                },
                 id: user.user?.id || null,
                 first_name: user.user?.first_name || '',
                 last_name: user.user?.last_name || '',
@@ -73,16 +80,21 @@ export const authOptions: NextAuthOptions = {
     // jwt({ token, user }) {
     //   return { ...token, user };
     // },
-    jwt({ token, user }) {
+    async session({ session, token, user }) {
+      session.access_token = token.accessToken;
+      session.user = token.user;
+      return session;
+    },
+    // session({ session, user }) {
+    //   // Modify the session object here
+    //   return { ...session, ...user };
+    // },
+    async jwt({ token, user }) {
       return { ...token, ...user };
     },
     // session({ session, token, user }) {
     //   return { ...session, ...token, ...user };
     // },
-    session({ session, user }) {
-      // Modify the session object here
-      return { ...session, ...user };
-    },
   },
   secret: process.env.NEXTAUTH_SECRET,
   // pages: {
