@@ -1,8 +1,8 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import Cookies from 'js-cookie';
-import { authOptions } from '../auth/[...nextauth]/route';
 import { API_URL } from '@/lib/api';
+import { authOptions } from '@/lib/auth';
 
 export async function GET() {
   const session = await getServerSession(authOptions);

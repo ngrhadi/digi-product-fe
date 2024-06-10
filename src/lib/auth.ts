@@ -18,6 +18,7 @@ export type ApiResponse = {
     email: string;
   };
 };
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
