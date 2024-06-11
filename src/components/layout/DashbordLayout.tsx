@@ -54,9 +54,9 @@ export default function DashbordLayout({
     refetch,
   } = useGetProduct(params);
 
-  const sortedProducts =
-    dataProduct?.sort((a, b) => a.product_name.localeCompare(b.product_name)) ??
-    [];
+  const sortedProducts = Array.isArray(dataProduct)
+    ? dataProduct?.sort((a, b) => a.product_name.localeCompare(b.product_name))
+    : [];
 
   // sortedProducts.length' is possibly 'undefined
   const totalPages = Math.ceil(sortedProducts?.length / itemsPerPage);
