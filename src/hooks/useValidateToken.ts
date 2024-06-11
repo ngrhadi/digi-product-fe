@@ -20,48 +20,60 @@ export default function useValidateToken({
     currentToken = access;
   }
 
-  console.log(currentToken, 'currentToken'); // why this empty
-  return useMutation<any, AxiosError>({
-    mutationFn: async () => {
-      try {
-        await API_URL.post('/api/token/verify/', {
-          token: currentToken,
-        });
 
-        Cookies.set('token', currentToken ?? '');
+    const mutation = useMutation<any, AxiosError>({
+      mutationFn: async () => {
+        try {
+          await API_URL.post('/api/token/verify/', {
+            token: currentToken,
+          });
 
-        // Token is valid
-        return true;
-      } catch (error) {
-        console.log('handle error');
-        const axiosError = error as AxiosError;
+          Cookies.set('token', currentToken ?? '');
 
-        if (
-          JSON.stringify(axiosError?.response?.data).includes(
-            'token_not_valid'
-          ) &&
-          refresh
-        ) {
-          try {
-            console.log('handle error 2');
-            const refreshResponse = await API_URL.post('/api/token/refresh/', {
-              refresh: refresh,
-            });
-            Cookies.set('token', refreshResponse.data.access);
-            return true;
-          } catch (refreshError) {
-            console.log('handle error 3');
-            console.error('Error refreshing token:', refreshError);
+          // Token is valid
+          return true;
+        } catch (error) {
+          console.log('handle error');
+          const axiosError = error as AxiosError;
+
+          // Check if the error response indicates the token is not valid
+          const isTokenInvalid = JSON.stringify(
+            axiosError?.response?.data
+          ).includes('token_not_valid');
+
+          console.log(isTokenInvalid, 'isTokenInvalid');
+
+          if (isTokenInvalid && refresh) {
+            try {
+              console.log('handle error 2');
+              const refreshResponse = await API_URL.post(
+                '/api/token/refresh/',
+                {
+                  refresh: refresh,
+                }
+              );
+              Cookies.set('token', refreshResponse.data.access);
+              return true;
+            } catch (refreshError) {
+              console.log('handle error 3');
+              console.error('Error refreshing token:', refreshError);
+              Cookies.set('token', currentToken ?? '');
+              return false;
+            }
+          } else {
             Cookies.set('token', currentToken ?? '');
+            console.log('handle error 4');
+            console.error('Token verification failed:', error);
             return false;
           }
-        } else {
-          console.log('handle error 4');
-          console.error('Token verification failed:', error);
-          Cookies.set('token', currentToken ?? '');
-          return false;
         }
-      }
-    },
-  });
+      },
+    });
+
+  if (currentToken && currentToken.length > 0) {
+    // Execute the mutation
+    mutation.mutate();
+  }
+
+  return { ...mutation };
 }
