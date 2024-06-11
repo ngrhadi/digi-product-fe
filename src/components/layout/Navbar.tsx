@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { API_URL } from '@/lib/api';
 import { ResponseJWT } from '@/types/response';
+import useValidateToken from '@/hooks/useValidateToken';
 
 export default function Navbar({
   isMobile,
@@ -19,13 +20,27 @@ export default function Navbar({
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const [name, setName] = useState<string>();
 
+  const [refreshToken, setRefreshToken] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const {
+    mutate: validateToken,
+    data,
+    error,
+  } = useValidateToken({
+    refresh: refreshToken,
+    access: accessToken,
+  });
+
   useEffect(() => {
     fetch('/api/user')
       .then((res) => res.json())
       .then(async (data) => {
+        setRefreshToken(data.token.refresh_token);
+        setAccessToken(data.token.access_token);
         setName(data.first_name);
+        validateToken();
       });
-  }, []);
+  }, [validateToken]);
 
   return (
     <>

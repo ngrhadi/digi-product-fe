@@ -9,6 +9,7 @@ import { createTheme, MantineProvider } from '@mantine/core';
 import { Session } from 'next-auth';
 import { usePathname, useRouter } from 'next/navigation';
 import AuthWrapper from '@/components/AuthWrapper';
+import useValidateToken from '@/hooks/useValidateToken';
 
 type Props = {
   children?: ReactNode;

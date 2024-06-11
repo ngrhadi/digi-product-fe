@@ -4,7 +4,10 @@ import NextAuthProvider from './providers';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
+import Cookies from 'js-cookie';
+import { API_URL } from '@/lib/api';
 import './globals.css';
+import useValidateToken from '@/hooks/useValidateToken';
 
 const inter = Inter({ subsets: ['latin'] });
 
