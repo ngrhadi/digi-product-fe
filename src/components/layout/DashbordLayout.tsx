@@ -2,6 +2,7 @@
 import Navbar from '@/components/layout/Navbar';
 import { ButtonHome } from '@/components/ui/Button';
 import useGetProduct, { ParamGetProduct } from '@/hooks/useGetProduct';
+import { USER_INFO } from '@/store/user';
 import { UseSessionResult } from '@/types/auth';
 import {
   AppShell,
@@ -18,10 +19,12 @@ import {
   useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useAtomValue } from 'jotai';
 import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 
 export default function DashbordLayout({
   children,
@@ -30,6 +33,8 @@ export default function DashbordLayout({
   children: ReactNode;
   session?: Session | null;
 }) {
+  const userInfo = useAtomValue(USER_INFO);
+
   const { data, status } = useSession();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
@@ -46,6 +51,13 @@ export default function DashbordLayout({
   const itemsPerPage = 9;
 
   const [params, setParams] = useState<ParamGetProduct>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setParams((prev) => ({ ...prev, [name]: value }));
+  };
 
   const {
     data: dataProduct,
@@ -69,6 +81,21 @@ export default function DashbordLayout({
 
   const handleFormSubmit = (submittedParams: ParamGetProduct) => {
     setParams(submittedParams);
+    refetch();
+  };
+
+  const currentToken = Cookies.get('token');
+
+  useEffect(() => {
+    if (currentToken && currentToken.length > 0) {
+      refetch();
+    }
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToken]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     refetch();
   };
 
@@ -205,7 +232,23 @@ export default function DashbordLayout({
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <ParamForm onSubmit={handleFormSubmit} />
+        <form onSubmit={handleSubmit}>
+          {/* <TextInput name="id" label="ID" onChange={handleChange} /> */}
+          <TextInput
+            name="product_name"
+            label="Product Name"
+            onChange={handleChange}
+          />
+          <TextInput name="category" label="Category" onChange={handleChange} />
+          <TextInput name="location" label="Location" onChange={handleChange} />
+          <TextInput name="quantity" label="Quantity" onChange={handleChange} />
+          <TextInput
+            name="total_selling"
+            label="Total Selling"
+            onChange={handleChange}
+          />
+          <Button type="submit">Search</Button>
+        </form>
       </AppShell.Navbar>
       <AppShell.Main>
         {children}
@@ -236,43 +279,3 @@ export default function DashbordLayout({
     </AppShell>
   );
 }
-
-interface ParamFormProps {
-  onSubmit: (params: ParamGetProduct) => void;
-}
-
-const ParamForm: React.FC<ParamFormProps> = ({ onSubmit }) => {
-  const [params, setParams] = useState<ParamGetProduct>({});
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setParams((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit(params);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* <TextInput name="id" label="ID" onChange={handleChange} /> */}
-      <TextInput
-        name="product_name"
-        label="Product Name"
-        onChange={handleChange}
-      />
-      <TextInput name="category" label="Category" onChange={handleChange} />
-      <TextInput name="location" label="Location" onChange={handleChange} />
-      <TextInput name="quantity" label="Quantity" onChange={handleChange} />
-      <TextInput
-        name="total_selling"
-        label="Total Selling"
-        onChange={handleChange}
-      />
-      <Button type="submit">Search</Button>
-    </form>
-  );
-};

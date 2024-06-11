@@ -9,6 +9,8 @@ import Cookies from 'js-cookie';
 import { API_URL } from '@/lib/api';
 import { ResponseJWT } from '@/types/response';
 import useValidateToken from '@/hooks/useValidateToken';
+import { useSetAtom } from 'jotai';
+import { USER_INFO } from '@/store/user';
 
 export default function Navbar({
   isMobile,
@@ -19,6 +21,7 @@ export default function Navbar({
 }) {
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const [name, setName] = useState<string>();
+  const setUser = useSetAtom(USER_INFO);
 
   const [refreshToken, setRefreshToken] = useState('');
   const [accessToken, setAccessToken] = useState('');
@@ -38,9 +41,12 @@ export default function Navbar({
         setRefreshToken(data.token.refresh_token);
         setAccessToken(data.token.access_token);
         setName(data.first_name);
-      }).then(() => {
+        setUser({ ...data });
+      })
+      .then(() => {
         validateToken();
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validateToken]);
 
   return (

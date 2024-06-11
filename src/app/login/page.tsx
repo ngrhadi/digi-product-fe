@@ -1,9 +1,7 @@
 'use client';
 import AuthLayout from '@/components/layout/AuthLayout';
 import useLogin from '@/hooks/useLogin';
-import { USER_INFO } from '@/store/user';
 import { Button, Checkbox, Input, PasswordInput } from '@mantine/core';
-import { useSetAtom } from 'jotai';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -14,9 +12,6 @@ export default function Home() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
-  const setUser = useSetAtom(USER_INFO);
-
   const router = useRouter();
 
   const { mutate } = useLogin();
