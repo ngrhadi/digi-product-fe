@@ -33,6 +33,7 @@ export default function useValidateToken({
         // Token is valid
         return true;
       } catch (error) {
+        console.log('handle error');
         const axiosError = error as AxiosError;
 
         if (
@@ -42,17 +43,20 @@ export default function useValidateToken({
           refresh
         ) {
           try {
+            console.log('handle error 2');
             const refreshResponse = await API_URL.post('/api/token/refresh/', {
               refresh: refresh,
             });
             Cookies.set('token', refreshResponse.data.access);
             return true;
           } catch (refreshError) {
+            console.log('handle error 3');
             console.error('Error refreshing token:', refreshError);
             Cookies.set('token', currentToken ?? '');
             return false;
           }
         } else {
+          console.log('handle error 4');
           console.error('Token verification failed:', error);
           Cookies.set('token', currentToken ?? '');
           return false;

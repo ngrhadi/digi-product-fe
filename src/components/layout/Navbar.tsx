@@ -38,6 +38,7 @@ export default function Navbar({
         setRefreshToken(data.token.refresh_token);
         setAccessToken(data.token.access_token);
         setName(data.first_name);
+      }).then(() => {
         validateToken();
       });
   }, [validateToken]);
